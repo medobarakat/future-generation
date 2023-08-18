@@ -23,6 +23,7 @@ import "../styles/CourseListStyles.css"; // Import your external CSS file
 function CourseList() {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [oldSelectedCourse, setOldSelectedCourse] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const formatDate = (apiDate) => {
     const date = new Date(apiDate);
@@ -54,7 +55,9 @@ function CourseList() {
     }
   };
 
+
   const handleEditCourse = (course) => {
+    setOldSelectedCourse(course);
     setSelectedCourse(course);
     setIsDialogOpen(true);
   };
@@ -65,12 +68,18 @@ function CourseList() {
   };
 
   const handleUpdateCourse = () => {
-    // Implement the update logic here
-    console.log("Updating course:", selectedCourse);
+    console.log(selectedCourse)
+    // there is no update api that can change the data directly to the database !
+    // so i can handle it if there was one
     handleCloseDialog();
   };
 
-  const handleRemoveCourse = () => {};
+  const handleRemoveCourse = () => {
+     // there is no update api that can change the data directly to the database !
+    // so i can handle it if there was one
+    console.log(selectedCourse)
+
+  };
 
   return (
     <div>
@@ -88,34 +97,6 @@ function CourseList() {
                 //   setSelectedCourse({
                 //     ...selectedCourse,
                 //     courseName: e.target.value,
-                //   })
-                // }
-                disabled
-              />
-              <TextField
-                label="Start Date"
-                type="date"
-                variant="outlined"
-                fullWidth
-                value={selectedCourse.startDate}
-                // onChange={(e) =>
-                //   setSelectedCourse({
-                //     ...selectedCourse,
-                //     startDate: e.target.value,
-                //   })
-                // }
-                disabled
-              />
-              <TextField
-                label="End Date"
-                type="date"
-                variant="outlined"
-                fullWidth
-                value={selectedCourse.endDate}
-                // onChange={(e) =>
-                //   setSelectedCourse({
-                //     ...selectedCourse,
-                //     endDate: e.target.value,
                 //   })
                 // }
                 disabled
