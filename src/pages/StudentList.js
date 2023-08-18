@@ -54,6 +54,7 @@ function StudentList() {
 
   const handleUpdateStudent = () => {
     console.log(selectedStudent);
+    console.log(oldSelectedStudent)
     handleCloseDialog();
       // there is no update api that can change the data directly to the database !
     // so i can handle it if there was one

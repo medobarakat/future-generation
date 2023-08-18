@@ -25,20 +25,7 @@ function CourseList() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [oldSelectedCourse, setOldSelectedCourse] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const formatDate = (apiDate) => {
-    const date = new Date(apiDate);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  // Convert "YYYY-MM-DD" date string to API format
-  const formatToApiDate = (formattedDate) => {
-    const [year, month, day] = formattedDate.split("-");
-    return new Date(year, month - 1, day).toISOString();
-  };
-
+  
   useEffect(() => {
     fetchCourses();
   }, []);
@@ -69,6 +56,7 @@ function CourseList() {
 
   const handleUpdateCourse = () => {
     console.log(selectedCourse)
+    console.log(oldSelectedCourse)
     // there is no update api that can change the data directly to the database !
     // so i can handle it if there was one
     handleCloseDialog();
