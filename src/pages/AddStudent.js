@@ -2,22 +2,19 @@ import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import axios from "axios";
-import Dialog from "@mui/material/Dialog"; // Import Dialog component
+import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import "../styles/AddStudentStyles.css"; // Import your external CSS file
+import * as yup from "yup"; // Import yup
+import { useFormik } from "formik"; // Import useFormik
+import "../styles/AddStudentStyles.css"; // Import the external CSS file
 import { MenuItem, Select } from "@mui/material";
 
 function AddStudent() {
-  const [studentname, setStudentname] = useState("");
-  const [email, setEmail] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [address, setAddress] = useState("");
-  const [assignedCourses, setAssignedCourses] = useState("");
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [courses, setCouses] = useState();
+  const [courses, setCouses] = useState([]);
   const generatedId = Math.floor(Math.random() * 9000) + 1000;
 
   useEffect(() => {
@@ -25,43 +22,56 @@ function AddStudent() {
   }, []);
 
   const fetchCourses = async () => {
-    axios
-      .get("https://sheetdb.io/api/v1/l5mcztj8wtyhg?sheet=courses")
-      .then((res) => {
-        console.log(res.data);
-        setCouses(res.data)
-      });
+    try {
+      const response = await axios.get(
+        "https://sheetdb.io/api/v1/l5mcztj8wtyhg?sheet=courses"
+      );
+      setCouses(response.data);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
   };
 
-  const handleAddStudent = async () => {
-    const newStudent = {
-      id: generatedId,
-      studentname,
-      email,
-      telephone,
-      address,
-      assignedCourses,
-    };
+  const validationSchema = yup.object().shape({
+    studentname: yup.string().required("Name is required"),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    telephone: yup.string().required("Telephone is required"),
+    address: yup.string().required("Address is required"),
+    assignedCourses: yup.string().required("Assigned course is required"),
+  });
 
-    axios
-      .post(
-        "https://sheetdb.io/api/v1/l5mcztj8wtyhg?sheet=students",
-        newStudent
-      )
-      .then((res) => {
-        console.log(res);
-        setSuccessModalOpen(true);
-        setStudentname("");
-        setEmail("");
-        setTelephone("");
-        setAddress("");
-        setAssignedCourses("");
-      });
-  };
+  const formik = useFormik({
+    initialValues: {
+      studentname: "",
+      email: "",
+      telephone: "",
+      address: "",
+      assignedCourses: "none",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      const newStudent = {
+        id: generatedId,
+        ...values,
+      };
+
+      axios
+        .post(
+          "https://sheetdb.io/api/v1/l5mcztj8wtyhg?sheet=students",
+          newStudent
+        )
+        .then((res) => {
+          console.log(res);
+          setSuccessModalOpen(true);
+          formik.resetForm(); // Reset form after successful submission
+        });
+    },
+  });
 
   const handleCloseSuccessModal = () => {
     setSuccessModalOpen(false);
   };
+
   return (
     <div className="add-student-container">
       <Dialog
@@ -89,49 +99,61 @@ function AddStudent() {
         className="input-field"
         label="Name"
         variant="outlined"
-        value={studentname}
-        onChange={(e) => setStudentname(e.target.value)}
+        name="studentname"
+        value={formik.values.studentname}
+        onChange={formik.handleChange}
+        error={formik.touched.studentname && Boolean(formik.errors.studentname)}
+        helperText={formik.touched.studentname && formik.errors.studentname}
       />
       <TextField
         className="input-field"
         label="Email"
         variant="outlined"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        name="email"
+        value={formik.values.email}
+        onChange={formik.handleChange}
+        error={formik.touched.email && Boolean(formik.errors.email)}
+        helperText={formik.touched.email && formik.errors.email}
       />
       <TextField
         className="input-field"
         label="Telephone"
         variant="outlined"
-        value={telephone}
-        onChange={(e) => setTelephone(e.target.value)}
+        name="telephone"
+        value={formik.values.telephone}
+        onChange={formik.handleChange}
+        error={formik.touched.telephone && Boolean(formik.errors.telephone)}
+        helperText={formik.touched.telephone && formik.errors.telephone}
       />
       <TextField
         className="input-field"
         label="Address"
         variant="outlined"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
+        name="address"
+        value={formik.values.address}
+        onChange={formik.handleChange}
+        error={formik.touched.address && Boolean(formik.errors.address)}
+        helperText={formik.touched.address && formik.errors.address}
       />
       <Select
         className="input-field"
-        value={assignedCourses}
-        onChange={(e) => setAssignedCourses(e.target.value)}
+        value={formik.values.assignedCourses}
+        onChange={formik.handleChange}
         variant="outlined"
+        name="assignedCourses"
       >
-        <MenuItem value="none">none</MenuItem>
-        {
-          courses?.map((course)=>(
-
-            <MenuItem key={course.id} value={course.courseName}>{course.courseName}</MenuItem>
-          ))
-        }
+        <MenuItem value="none">None</MenuItem>
+        {courses.map((course) => (
+          <MenuItem key={course.id} value={course.courseName}>
+            {course.courseName}
+          </MenuItem>
+        ))}
       </Select>
       <Button
         className="submit-button"
         variant="contained"
         color="primary"
-        onClick={handleAddStudent}
+        onClick={formik.handleSubmit}
       >
         Add Student
       </Button>
